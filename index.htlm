@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZTV Moyenne — Application Élève</title>
+    <style>
+        /* --- STYLES ET CHARTE GRAPHIQUE ZTV MOYENNE --- */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-badge {
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .container {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .input-ztv {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .input-ztv:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn-ztv {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-ztv:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+        }
+
+        .btn-accent:hover {
+            background-color: #059669;
+        }
+
+        /* --- BLOC J'AI DÉJÀ MA MOYENNE --- */
+        .direct-average-box {
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px dashed var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .direct-input-container {
+            display: none;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message {
+            color: var(--accent);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* TABLAUX ET GRILLES DE MATIERES */
+        .subject-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .result-badge {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .dashboard-item {
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .dashboard-item:hover {
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <span class="logo-badge">ZTV</span>
+            <span>Moyenne</span>
+        </div>
+        <nav id="app-nav" style="display: none;">
+            <button class="nav-btn" onclick="showScreen('screen-dashboard')">Tableau de bord</button>
+            <button class="nav-btn" onclick="showScreen('screen-profil')">Profil</button>
+            <button class="nav-btn" onclick="logout()">Déconnexion</button>
+        </nav>
+    </header>
+
+    <div class="container">
+
+        <!-- ================= ECRAN CONNEXION ================= -->
+        <section id="screen-login" class="screen active">
+            <div class="card" style="max-width: 400px; margin: 40px auto;">
+                <h2>Connexion Élève</h2>
+                <form id="form-login" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-username">Identifiant</label>
+                        <input type="text" id="login-username" class="input-ztv" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Mot de passe</label>
+                        <input type="password" id="login-password" class="input-ztv" required>
+                    </div>
+                    <p id="login-error" class="error-message"></p>
+                    <button type="submit" class="btn-ztv" style="margin-top: 10px;">Se connecter</button>
+                </form>
+                <div style="margin-top: 20px; text-align: center;">
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Pas encore de compte ?</p>
+                    <button class="btn-ztv btn-secondary" onclick="showScreen('screen-register')" style="margin-top: 5px;">S'inscrire</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ECRAN INSCRIPTION ================= -->
+        <section id="screen-register" class="screen">
+            <div class="card" style="max-width: 450px; margin: 20px auto;">
+                <h2>Inscription Élève</h2>
+                <form id="form-register" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="reg-nom">Nom</label>
+                        <input type="text" id="reg-nom" class="input-ztv" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-prenom">Prénom</label>
+                        <input type="text" id="reg-prenom" class="input-ztv" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-classe">Classe</label>
+                        <select id="reg-classe" class="input-ztv" required>
+                            <option value="">Sélectionner votre classe</option>
+                            <option value="6eme">6ème</option>
+                            <option value="5eme">5ème</option>
+                            <option value="4eme">4ème</option>
+                            <option value="3eme">3ème</option>
+                            <option value="2nde">2nde</option>
+                            <option value="1ere">1ère</option>
+                            <option value="Tle">Terminale</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-username">Identifiant</label>
+                        <input type="text" id="reg-username" class="input-ztv" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Mot de passe</label>
+                        <input type="password" id="reg-password" class="input-ztv" required>
+                    </div>
+                    <p id="reg-error" class="error-message"></p>
+                    <button type="submit" class="btn-ztv" style="margin-top: 10px;">Créer mon compte</button>
+                </form>
+                <div style="margin-top: 15px; text-align: center;">
+                    <button class="btn-ztv btn-secondary" onclick="showScreen('screen-login')">Retour à la connexion</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TABLEAU DE BORD ELÈVE ================= -->
+        <section id="screen-dashboard" class="screen">
+            <div class="card">
+                <h2 id="welcome-message">Bienvenue !</h2>
+                <p style="color: var(--text-muted);">Sélectionnez un trimestre ou consultez vos résultats généraux.</p>
+            </div>
+
+            <div class="grid-dashboard">
+                <div class="dashboard-item" onclick="showScreen('screen-t1')">
+                    <h3>1er Trimestre</h3>
+                    <p id="dash-t1-val" class="result-badge">-- / 20</p>
+                </div>
+                <div class="dashboard-item" onclick="showScreen('screen-t2')">
+                    <h3>2e Trimestre</h3>
+                    <p id="dash-t2-val" class="result-badge">-- / 20</p>
+                </div>
+                <div class="dashboard-item" onclick="showScreen('screen-t3')">
+                    <h3>3e Trimestre</h3>
+                    <p id="dash-t3-val" class="result-badge">-- / 20</p>
+                </div>
+                <div class="dashboard-item" onclick="showScreen('screen-annuelle')">
+                    <h3>Moyenne Annuelle</h3>
+                    <p id="dash-annual-val" class="result-badge">-- / 20</p>
+                </div>
+                <div class="dashboard-item" onclick="showScreen('screen-orientation')">
+                    <h3>Moyenne d'Orientation</h3>
+                    <p id="dash-orientation-val" class="result-badge">-- / 20</p>
+                </div>
+                <div class="dashboard-item" onclick="showScreen('screen-bulletin')">
+                    <h3>Mon Bulletin</h3>
+                    <p style="margin-top: 10px; color: var(--primary);">Consulter →</p>
+                </div>
+                <div class="dashboard-item" onclick="showScreen('screen-tableau-honneur')">
+                    <h3>Tableau d'Honneur</h3>
+                    <p style="margin-top: 10px; color: var(--accent);">Consulter →</p>
+                </div>
+                <div class="dashboard-item" onclick="showScreen('screen-diplome')">
+                    <h3>Mon Diplôme</h3>
+                    <p style="margin-top: 10px; color: var(--accent);">Consulter →</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 1ER TRIMESTRE ================= -->
+        <section id="screen-t1" class="screen">
+            <div class="card">
+                <h2>1er Trimestre</h2>
+
+                <!-- BOUTON J'AI DÉJÀ MA MOYENNE -->
+                <div class="direct-average-box">
+                    <button type="button" class="btn-ztv btn-accent" onclick="toggleDirectInput('t1')">J’ai déjà ma moyenne</button>
+                    <div id="t1-direct-container" class="direct-input-container">
+                        <label for="t1-direct-val">Saisir directement votre moyenne générale du 1er trimestre :</label>
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <input type="text" id="t1-direct-val" class="input-ztv" placeholder="Ex: 13,75">
+                            <button type="button" class="btn-ztv" onclick="saveDirectAverage('t1')" style="width: auto; padding: 0 20px;">Valider</button>
+                        </div>
+                        <p id="t1-direct-error" class="error-message"></p>
+                        <p id="t1-direct-success" class="success-message">Moyenne enregistrée avec succès !</p>
+                    </div>
+                </div>
+
+                <!-- FORMULAIRE CLASSIQUE MATIÈRES -->
+                <div id="t1-subjects-container">
+                    <h3>Saisie par matière (Méthode classique)</h3>
+                    <div class="subject-row">
+                        <span><strong>Matière</strong></span>
+                        <span><strong>Coeff.</strong></span>
+                        <span><strong>Moyenne</strong></span>
+                    </div>
+                    <!-- Liste dynamique des matières injectée par JS -->
+                    <div id="t1-subjects-list"></div>
+                    <button class="btn-ztv" onclick="calculateTermFromSubjects('t1')" style="margin-top: 15px;">Calculer la moyenne du 1er trimestre</button>
+                </div>
+
+                <div class="result-badge" id="t1-result-display">Moyenne: -- / 20</div>
+            </div>
+            <button class="btn-ztv btn-secondary" onclick="showScreen('screen-dashboard')">Retour au tableau de bord</button>
+        </section>
+
+        <!-- ================= 2E TRIMESTRE ================= -->
+        <section id="screen-t2" class="screen">
+            <div class="card">
+                <h2>2e Trimestre</h2>
+
+                <!-- BOUTON J'AI DÉJÀ MA MOYENNE -->
+                <div class="direct-average-box">
+                    <button type="button" class="btn-ztv btn-accent" onclick="toggleDirectInput('t2')">J’ai déjà ma moyenne</button>
+                    <div id="t2-direct-container" class="direct-input-container">
+                        <label for="t2-direct-val">Saisir directement votre moyenne générale du 2e trimestre :</label>
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <input type="text" id="t2-direct-val" class="input-ztv" placeholder="Ex: 14,20">
+                            <button type="button" class="btn-ztv" onclick="saveDirectAverage('t2')" style="width: auto; padding: 0 20px;">Valider</button>
+                        </div>
+                        <p id="t2-direct-error" class="error-message"></p>
+                        <p id="t2-direct-success" class="success-message">Moyenne enregistrée avec succès !</p>
+                    </div>
+                </div>
+
+                <!-- FORMULAIRE CLASSIQUE MATIÈRES -->
+                <div id="t2-subjects-container">
+                    <h3>Saisie par matière (Méthode classique)</h3>
+                    <div class="subject-row">
+                        <span><strong>Matière</strong></span>
+                        <span><strong>Coeff.</strong></span>
+                        <span><strong>Moyenne</strong></span>
+                    </div>
+                    <div id="t2-subjects-list"></div>
+                    <button class="btn-ztv" onclick="calculateTermFromSubjects('t2')" style="margin-top: 15px;">Calculer la moyenne du 2e trimestre</button>
+                </div>
+
+                <div class="result-badge" id="t2-result-display">Moyenne: -- / 20</div>
+            </div>
+            <button class="btn-ztv btn-secondary" onclick="showScreen('screen-dashboard')">Retour au tableau de bord</button>
+        </section>
+
+        <!-- ================= 3E TRIMESTRE ================= -->
+        <section id="screen-t3" class="screen">
+            <div class="card">
+                <h2>3e Trimestre</h2>
+
+                <!-- BOUTON J'AI DÉJÀ MA MOYENNE -->
+                <div class="direct-average-box">
+                    <button type="button" class="btn-ztv btn-accent" onclick="toggleDirectInput('t3')">J’ai déjà ma moyenne</button>
+                    <div id="t3-direct-container" class="direct-input-container">
+                        <label for="t3-direct-val">Saisir directement votre moyenne générale du 3e trimestre :</label>
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <input type="text" id="t3-direct-val" class="input-ztv" placeholder="Ex: 15,10">
+                            <button type="button" class="btn-ztv" onclick="saveDirectAverage('t3')" style="width: auto; padding: 0 20px;">Valider</button>
+                        </div>
+                        <p id="t3-direct-error" class="error-message"></p>
+                        <p id="t3-direct-success" class="success-message">Moyenne enregistrée avec succès !</p>
+                    </div>
+                </div>
+
+                <!-- FORMULAIRE CLASSIQUE MATIÈRES -->
+                <div id="t3-subjects-container">
+                    <h3>Saisie par matière (Méthode classique)</h3>
+                    <div class="subject-row">
+                        <span><strong>Matière</strong></span>
+                        <span><strong>Coeff.</strong></span>
+                        <span><strong>Moyenne</strong></span>
+                    </div>
+                    <div id="t3-subjects-list"></div>
+                    <button class="btn-ztv" onclick="calculateTermFromSubjects('t3')" style="margin-top: 15px;">Calculer la moyenne du 3e trimestre</button>
+                </div>
+
+                <div class="result-badge" id="t3-result-display">Moyenne: -- / 20</div>
+            </div>
+            <button class="btn-ztv btn-secondary" onclick="showScreen('screen-dashboard')">Retour au tableau de bord</button>
+        </section>
+
+        <!-- ================= MOYENNE ANNUELLE ================= -->
+        <section id="screen-annuelle" class="screen">
+            <div class="card">
+                <h2>Moyenne Annuelle</h2>
+                <div style="margin-bottom: 20px;">
+                    <p>1er Trimestre : <strong id="annual-t1-val">--</strong></p>
+                    <p>2e Trimestre : <strong id="annual-t2-val">--</strong></p>
+                    <p>3e Trimestre : <strong id="annual-t3-val">--</strong></p>
+                </div>
+                <div class="result-badge" id="annual-result-display">Moyenne Annuelle: -- / 20</div>
+            </div>
+            <button class="btn-ztv btn-secondary" onclick="showScreen('screen-dashboard')">Retour au tableau de bord</button>
+        </section>
+
+        <!-- ================= MOYENNE D'ORIENTATION ================= -->
+        <section id="screen-orientation" class="screen">
+            <div class="card">
+                <h2>Moyenne d'Orientation</h2>
+                <p style="color: var(--text-muted); margin-bottom: 15px;">Calculée sur la base des règles officielles d'orientation.</p>
+                <div class="result-badge" id="orientation-result-display">Moyenne: -- / 20</div>
+            </div>
+            <button class="btn-ztv btn-secondary" onclick="showScreen('screen-dashboard')">Retour au tableau de bord</button>
+        </section>
+
+        <!-- ================= BULLETIN ================= -->
+        <section id="screen-bulletin" class="screen">
+            <div class="card">
+                <h2>Bulletin de Notes</h2>
+                <div id="bulletin-content">
+                    <p style="color: var(--text-muted);">Synthèse des moyennes enregistrées pour l'année scolaire.</p>
+                    <!-- Contenu généré dynamiquement -->
+                </div>
+            </div>
+            <button class="btn-ztv btn-secondary" onclick="showScreen('screen-dashboard')">Retour au tableau de bord</button>
+        </section>
+
+        <!-- ================= TABLEAU D'HONNEUR ================= -->
+        <section id="screen-tableau-honneur" class="screen">
+            <div class="card" style="text-align: center;">
+                <h2>Tableau d'Honneur</h2>
+                <div id="th-content" style="margin: 20px 0;">
+                    <p id="th-status" class="result-badge">--</p>
+                </div>
+            </div>
+            <button class="btn-ztv btn-secondary" onclick="showScreen('screen-dashboard')">Retour au tableau de bord</button>
+        </section>
+
+        <!-- ================= DIPLÔME ================= -->
+        <section id="screen-diplome" class="screen">
+            <div class="card" style="text-align: center; border: 2px solid var(--accent);">
+                <h2>Diplôme ZTV Moyenne</h2>
+                <div id="diploma-content" style="margin: 30px 0;">
+                    <h3 id="diploma-student-name">--</h3>
+                    <p id="diploma-mention" style="font-size: 1.2rem; color: var(--accent); margin-top: 10px;">--</p>
+                </div>
+            </div>
+            <button class="btn-ztv btn-secondary" onclick="showScreen('screen-dashboard')">Retour au tableau de bord</button>
+        </section>
+
+        <!-- ================= PROFIL ================= -->
+        <section id="screen-profil" class="screen">
+            <div class="card">
+                <h2>Profil Élève</h2>
+                <div style="line-height: 2;">
+                    <p>Nom : <strong id="profile-nom">--</strong></p>
+                    <p>Prénom : <strong id="profile-prenom">--</strong></p>
+                    <p>Classe : <strong id="profile-classe">--</strong></p>
+                    <p>Identifiant : <strong id="profile-username">--</strong></p>
+                </div>
+            </div>
+            <button class="btn-ztv btn-secondary" onclick="showScreen('screen-dashboard')">Retour au tableau de bord</button>
+        </section>
+
+    </div>
+
+    <!-- LOGIQUE JAVASCRIPT LOCAL HORS LIGNE (À placer directement ou dans un script local app.js) -->
+    <script>
+        // Logique de gestion locale et calculs à lier avec app.js...
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function toggleDirectInput(term) {
+            const container = document.getElementById(`${term}-direct-container`);
+            container.style.display = container.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>
